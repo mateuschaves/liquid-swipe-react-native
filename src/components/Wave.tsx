@@ -41,7 +41,7 @@ interface WaveProps {
 }
 
 const Wave = ({ side, children }: WaveProps) => {
-  return ;
+  return <View style={StyleSheet.absoluteFill}>{children}</View>;
 };
 
 export default Wave;
