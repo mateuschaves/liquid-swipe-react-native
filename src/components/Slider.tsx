@@ -36,15 +36,17 @@ const Slider = ({
   const hasPrev = !!prev;
   const hasNext = !!next;
   const activeSide = useSharedValue(Side.NONE);
+  const zIndex = useSharedValue(0);
   const isTransitioningLeft = useSharedValue(false);
   const isTransitioningRight = useSharedValue(false);
   const left = useVector(0, HEIGHT / 2);
   const right = useVector(0, HEIGHT / 2);
   const onGestureEvent = useAnimatedGestureHandler({
     onStart: ({ x }) => {
-      if (x < MARGIN_WIDTH) {
+      if (x < MARGIN_WIDTH && hasPrev) {
         activeSide.value = Side.LEFT;
-      } else if (x > WIDTH - MARGIN_WIDTH) {
+        zIndex.value = 100;
+      } else if (x > WIDTH - MARGIN_WIDTH && hasNext) {
         activeSide.value = Side.RIGHT;
       } else {
         activeSide.value = Side.NONE;
@@ -52,10 +54,10 @@ const Slider = ({
     },
     onActive: ({ x, y }) => {
       if (activeSide.value === Side.LEFT) {
-        left.x.value = x;
+        left.x.value = Math.max(x, MARGIN_WIDTH);
         left.y.value = y;
       } else if (activeSide.value === Side.RIGHT) {
-        right.x.value = WIDTH - x;
+        right.x.value = Math.max(WIDTH - x, MARGIN_WIDTH);
         right.y.value = y;
       }
     },
@@ -76,6 +78,8 @@ const Slider = ({
           () => {
             if (isTransitioningLeft.value) {
               runOnJS(setIndex)(index - 1);
+            } else {
+              activeSide.value = Side.NONE
             }
           }
         );
@@ -108,7 +112,7 @@ const Slider = ({
   }, []);
 
   const leftStyle = useAnimatedStyle(() => ({
-    zIndex: activeSide.value === Side.LEFT ? 100 : 0,
+    zIndex: zIndex.value,
   }));
   return (
     <PanGestureHandler onGestureEvent={onGestureEvent}>
